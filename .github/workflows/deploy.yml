@@ -1,0 +1,46 @@
+name: Deploy
+on:
+  push:
+    branches:
+      - master
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        stage: [dev, staging, prod]
+    environment:
+      name: ${{ matrix.stage }}
+    env:
+      CURRENT_ENV: ${{ matrix.stage }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Configurar Variáveis por Ambiente
+        run: |
+          echo "Preparando configuração para: $CURRENT_ENV"
+          if [ "$CURRENT_ENV" == "prod" ]; then
+            echo "API_URL=https://api.site.com" >> $GITHUB_ENV
+          elif [ "$CURRENT_ENV" == "staging" ]; then
+            echo "API_URL=https://api-staging.site.com" >> $GITHUB_ENV
+          else
+            echo "API_URL=https://api-dev.site.com" >> $GITHUB_ENV
+          fi
+      - name: Simular Deploy com Credenciais
+        env:
+          API_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
+        run: |
+          echo "Conectando em $API_URL usando token: $API_TOKEN"
+      - name: Mensagem de Conclusão Personalizada
+        run: |
+          case "$CURRENT_ENV" in
+            "prod")
+              echo "Deploy em PRODUÇÃO finalizado com sucesso! Verifique os logs de monitoramento."
+              ;;
+            "staging")
+              echo "Deploy em Staging concluído. QA já pode iniciar os testes."
+              ;;
+            "dev")
+              echo "Ambiente de Dev atualizado. Pode quebrar à vontade."
+              ;;
+          esac
