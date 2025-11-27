@@ -1,0 +1,14 @@
+name: CI Debug Example
+on:
+  push:
+    branches:
+      - master
+jobs:
+  debug:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Linha adicional de detalhe
+        run: |
+         echo "Detalhe: ambiente=$GITHUB_ENV, run_id=$GITHUB_RUN_ID, actor=$GITHUB_ACTOR"
